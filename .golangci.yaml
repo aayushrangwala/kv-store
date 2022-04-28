@@ -1,0 +1,37 @@
+# https://github.com/golangci/golangci-lint#config-file
+linters:
+  enable-all: true
+  disable:
+    - dupl
+    - gochecknoglobals
+    - gochecknoinits
+    - lll
+    - gocyclo
+    - gocognit
+    - godox
+    - wsl
+    - funlen
+    - gomnd
+    - staticcheck
+    - testpackage
+    - stylecheck
+    - nlreturn
+    - gosimple
+    - goerr113
+    - nestif
+    - exhaustive
+    - gofumpt
+    - godot
+    - gocritic
+    - gci
+
+run:
+  tests: true
+  deadline: 5m
+  modules-download-mode: vendor
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - scopelint
