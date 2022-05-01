@@ -8,17 +8,20 @@ import (
 
 var _ store.TransactionStack = &stack{}
 
+// stack will implement the TransactionStack interface.
 type stack struct {
 	latest      *transaction
 	size        int32
-	limit       int32
-	GlobalStore map[string]string
+	globalStore map[string]string
 }
 
+// Start will start the transaction in memory by adding a transacation node to the latest and parent.
 func (stack *stack) Start() {
 	transctn := &transaction{
 		localStore: make(map[string]string),
 	}
+
+	stack.size++
 
 	if stack.latest == nil {
 		stack.latest = transctn
@@ -28,31 +31,19 @@ func (stack *stack) Start() {
 
 	transctn.parent = stack.latest
 	stack.latest = transctn
-
-	stack.size++
 }
 
-func (stack *stack) Quit() {
-	if stack.latest == nil {
+// Commit will persist all the data from transaction to global and parent transactions.
+func (stack *stack) Commit() {
+	ActiveTransaction := stack.latest
+	if ActiveTransaction == nil {
 		fmt.Println("ERROR: No Active transaction")
 
 		return
 	}
 
-	stack.latest = stack.latest.parent
-	stack.size--
-}
-
-func (stack *stack) Commit() {
-	ActiveTransaction := stack.latest
-	if ActiveTransaction == nil {
-		fmt.Println("INFO: No Active transaction")
-
-		return
-	}
-
 	for key, value := range ActiveTransaction.localStore {
-		stack.GlobalStore[key] = value
+		stack.globalStore[key] = value
 
 		if ActiveTransaction.parent != nil {
 			// update the parent transaction
@@ -61,12 +52,14 @@ func (stack *stack) Commit() {
 	}
 }
 
+// Abort will abort the current transaction and make the parent transaction active.
 func (stack *stack) Abort() {
 	if stack.latest == nil {
+		fmt.Println("INFO: No Active transaction")
+
 		return
 	}
 
-	for key := range stack.latest.localStore {
-		delete(stack.latest.localStore, key)
-	}
+	stack.latest = stack.latest.parent
+	stack.size--
 }

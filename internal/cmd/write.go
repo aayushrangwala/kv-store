@@ -1,6 +1,8 @@
 package cmd
 
-import "cryptowatch/backend-go/internal/store"
+import (
+	"cryptowatch/backend-go/internal/store"
+)
 
 var _ Executor = &write{}
 

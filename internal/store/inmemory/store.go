@@ -8,29 +8,37 @@ import (
 
 var _ store.Store = &inMemory{}
 
+// inMemory is the concrete type implementing store interface in a synchronized way.
 type inMemory struct {
 	transactionStack *stack
 	mu               sync.RWMutex
 }
 
+// transaction represents the inmemory transaction object having the link to its parent transaction if any.
 type transaction struct {
 	localStore map[string]string
 	parent     *transaction
 }
 
+// NewStore is the constructor for the inmemory data store.
 func NewStore() store.Store {
 	return &inMemory{
-		transactionStack: &stack{},
+		transactionStack: &stack{
+			globalStore: make(map[string]string),
+		},
 	}
 }
 
 // Get value of key from Store
 func (store *inMemory) Get(key string) string {
-	st := store.transactionStack.GlobalStore
+	store.mu.RLock()
+	defer store.mu.RUnlock()
 
-	ActiveTransaction := store.transactionStack.latest
-	if ActiveTransaction != nil {
-		st = ActiveTransaction.localStore
+	st := store.transactionStack.globalStore
+
+	activeTransaction := store.transactionStack.latest
+	if activeTransaction != nil {
+		st = activeTransaction.localStore
 	}
 
 	if val, present := st[key]; present {
@@ -42,42 +50,56 @@ func (store *inMemory) Get(key string) string {
 
 // Set key to value
 func (store *inMemory) Set(key, value string) {
-	// Get key:value store from active transaction
-	ActiveTransaction := store.transactionStack.latest
+	store.mu.Lock()
+	defer store.mu.Unlock()
 
-	if ActiveTransaction == nil {
-		store.transactionStack.GlobalStore[key] = value
+	// Get key:value store from active transaction
+	activeTransaction := store.transactionStack.latest
+
+	if activeTransaction == nil {
+		store.transactionStack.globalStore[key] = value
 
 		return
 	}
 
-	ActiveTransaction.localStore[key] = value
+	activeTransaction.localStore[key] = value
 }
 
 // Delete value from Store
 func (store *inMemory) Delete(key string) {
-	ActiveTransaction := store.transactionStack.latest
-	if ActiveTransaction == nil {
-		delete(store.transactionStack.GlobalStore, key)
+	store.mu.Lock()
+	defer store.mu.Unlock()
+
+	activeTransaction := store.transactionStack.latest
+	if activeTransaction == nil {
+		delete(store.transactionStack.globalStore, key)
 
 		return
 	}
 
-	delete(ActiveTransaction.localStore, key)
+	delete(activeTransaction.localStore, key)
 }
 
+// Start is a synchronized wrapper of transaction Start.
 func (store *inMemory) Start() {
+	store.mu.RLock()
+	defer store.mu.RUnlock()
+
 	store.transactionStack.Start()
 }
 
+// Commit is a synchronized wrapper of transaction Commit.
 func (store *inMemory) Commit() {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+
 	store.transactionStack.Commit()
 }
 
+// Abort is a synchronized wrapper of transaction Abort.
 func (store *inMemory) Abort() {
-	store.transactionStack.Abort()
-}
+	store.mu.Lock()
+	defer store.mu.Unlock()
 
-func (store *inMemory) Quit() {
-	store.transactionStack.Quit()
+	store.transactionStack.Abort()
 }

@@ -1,6 +1,11 @@
 package cmd
 
-import "cryptowatch/backend-go/internal/store"
+import (
+	"fmt"
+	"os"
+
+	"cryptowatch/backend-go/internal/store"
+)
 
 var _ Executor = &quit{}
 
@@ -15,7 +20,8 @@ func newQuitCommand(datastore store.Store) Executor {
 }
 
 func (cmd *quit) Execute() error {
-	cmd.ds.Quit()
+	fmt.Println("Execution Stopped. Thank you for using REPL!!")
+	os.Exit(0)
 
 	return nil
 }

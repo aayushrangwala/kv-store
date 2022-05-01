@@ -12,6 +12,9 @@ import (
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)
+	datastore := factory.NewStoreFactory().GetInmemoryStore()
+
+	fmt.Println("STARTING REPL: Key Value Store")
 
 	for {
 		fmt.Print("> ")
@@ -20,7 +23,6 @@ func main() {
 		// split the text into command strings
 		operation := strings.Fields(text)
 
-		datastore := factory.NewStoreFactory().GetInmemoryStore()
 		command, err := cmd.GetCommandExecutor(datastore, operation...)
 		if err != nil {
 			fmt.Println(err.Error())

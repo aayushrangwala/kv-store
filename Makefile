@@ -1,4 +1,4 @@
-GOPATH = $(shell go env GOPATH)
+MakefileGOPATH = $(shell go env GOPATH)
 GOOS=linux
 GOARCH=amd64
 GOOSTEST = $(shell go env GOOS)
@@ -6,7 +6,7 @@ VERSION ?= $(shell git rev-parse --abbrev-ref HEAD)-$(shell git describe --alway
 GIT_COMMIT ?= $(shell git rev-parse HEAD)
 export GO111MODULE=on
 
-all: build test
+all: vendor build test
 
 vendor:
 	go mod tidy
@@ -14,12 +14,13 @@ vendor:
 build: fmt lint vet clean vendor
 	CGO_ENABLED=0 go build -o bin/kv-store .
 
+run:
+	go run main.go
+
 clean:
 	rm -f bin/*
 
 vet:
-	go vet ./cmd/...
-	go vet ./pkg/...
 	go vet ./internal/...
 
 lint:
@@ -27,7 +28,7 @@ lint:
 	$(GOPATH)/bin/golangci-lint run ./internal/...
 
 test:
-	GOOS=$(GOOSTEST) go test -count=1./internal/... -cover
+	GOOS=$(GOOSTEST) go test -count=1 ./internal/... -cover
 
 fmt:
 	gofmt -w ./internal
