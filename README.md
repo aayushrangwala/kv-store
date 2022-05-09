@@ -1,4 +1,4 @@
-# Cryptowatch Golang Hiring Test: K/V REPL with nested transactions
+# K/V REPL with nested transactions
 
 Thank you for applying to work on Cryptowatch at Kraken!
 
