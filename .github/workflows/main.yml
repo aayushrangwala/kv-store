@@ -18,13 +18,13 @@ jobs:
         echo $PROJECT_PUBLIC_SSH_KEY
     - name: Use the Project ID outputs (display it)
       run: |
-        echo Equinix Metal Project "$PROJECT_NAME" has ID "$PROJECT_ID"
+        echo Equinix Metal Project "${{ variables.PROJECT_NAME }}" has ID "${{ variables.PROJECT_ID }}"
     - name: Create device in temporary project
       uses: equinix-labs/metal-device-action@main
 #       continue-on-error: true
       with:
         metal_auth_token: ${{ secrets.METAL_AUTH_TOKEN }}
-        metal_project_id: $PROJECT_ID
+        metal_project_id: ${{ variables.PROJECT_ID }}
         metro: da
         plan: m3.small.x86
         os: ubuntu_22_04
