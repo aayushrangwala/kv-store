@@ -7,11 +7,11 @@ jobs:
   project:
     runs-on: ubuntu-latest
     steps:
-    - name: Create temporary project
-      id: metal-project
-      uses: equinix-labs/metal-project-action@main
-      with:
-        userToken: ${{ secrets.METAL_AUTH_TOKEN }}
+#     - name: Create temporary project
+#       id: metal-project
+#       uses: equinix-labs/metal-project-action@main
+#       with:
+#         userToken: ${{ secrets.METAL_AUTH_TOKEN }}
     - name: Use the Project SSH Key outputs (display it)
       run: |
         echo $PROJECT_PRIVATE_SSH_KEY
@@ -34,8 +34,3 @@ jobs:
         metro: da
         plan: m3.small.x86
         os: ubuntu_22_04
-    - name: Delete temporary project & device
-      uses: equinix-labs/metal-sweeper-action@main
-      with:
-        authToken: ${{ secrets.METAL_AUTH_TOKEN }}
-        projectID: ${{ steps.metal-project.outputs.projectID }}
