@@ -21,9 +21,9 @@ jobs:
         echo Equinix Metal Project "$PROJECT_NAME" has ID "$PROJECT_ID"
     - name: Create device in temporary project
       uses: equinix-labs/metal-device-action@main
-      continue-on-error: true
+#       continue-on-error: true
       with:
-        metal_auth_token: ${{ steps.metal-project.outputs.projectToken }}
+        metal_auth_token: ${{ secrets.METAL_AUTH_TOKEN }}
         metal_project_id: $PROJECT_ID
         metro: da
         plan: m3.small.x86
