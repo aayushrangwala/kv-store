@@ -16,21 +16,15 @@ jobs:
       run: |
         echo $PROJECT_PRIVATE_SSH_KEY
         echo $PROJECT_PUBLIC_SSH_KEY
-      env:
-        PROJECT_PRIVATE_SSH_KEY: ${{ steps.metal-project.outputs.projectSSHPrivateKeyBase64 }}
-        PROJECT_PUBLIC_SSH_KEY: ${{ steps.metal-project.outputs.projectSSHPublicKey }}
     - name: Use the Project ID outputs (display it)
       run: |
         echo Equinix Metal Project "$PROJECT_NAME" has ID "$PROJECT_ID"
-      env:
-        PROJECT_ID: ${{ steps.metal-project.outputs.projectID }}
-        PROJECT_NAME: ${{ steps.metal-project.outputs.projectName }}
     - name: Create device in temporary project
       uses: equinix-labs/metal-device-action@main
       continue-on-error: true
       with:
         metal_auth_token: ${{ steps.metal-project.outputs.projectToken }}
-        metal_project_id: ${{ steps.metal-project.outputs.projectID }}
+        metal_project_id: $PROJECT_ID
         metro: da
         plan: m3.small.x86
         os: ubuntu_22_04
